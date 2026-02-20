@@ -30,13 +30,6 @@ function Write-Log {
     }
     
     Add-Content -Path $Script:LogFile -Value $logEntry -ErrorAction SilentlyContinue
-    
-    switch ($Level) {
-        "ERROR" { Write-Host $logEntry -ForegroundColor Red }
-        "WARNING" { Write-Host $logEntry -ForegroundColor Yellow }
-        "SUCCESS" { Write-Host $logEntry -ForegroundColor Green }
-        default { Write-Host $logEntry -ForegroundColor Cyan }
-    }
 }
 
 # ============================================================================

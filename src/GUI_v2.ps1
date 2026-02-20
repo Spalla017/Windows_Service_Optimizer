@@ -573,9 +573,7 @@ function Update-PowerPlanStatus {
 
 function Update-SystemStats {
     try {
-        $cpuLoad = (Get-CimInstance Win32_Processor -ErrorAction SilentlyContinue | Measure-Object -Property LoadPercentage -Average).Average
-        if ($null -eq $cpuLoad) { $cpuLoad = 0 }
-        $cpu = [math]::Round($cpuLoad)
+        $cpu = [math]::Round((Get-Counter '\Processor(_Total)\% Processor Time' -ErrorAction SilentlyContinue).CounterSamples[0].CookedValue)
         $barCPU.Value = $cpu
         $txtCPU.Text = "${cpu}%"
     }
