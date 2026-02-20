@@ -1,0 +1,262 @@
+﻿{
+    "categories": [
+        {
+            "name": "Telemetria e Rastreamento",
+            "services": [
+                {
+                    "name": "DiagTrack",
+                    "description": "Connected User Experiences and Telemetry"
+                },
+                {
+                    "name": "dmwappushservice",
+                    "description": "WAP Push Message Routing Service"
+                },
+                {
+                    "name": "diagnosticshub.standardcollector.service",
+                    "description": "Diagnostics Hub Standard Collector"
+                }
+            ]
+        },
+        {
+            "name": "Xbox e Gaming",
+            "services": [
+                {
+                    "name": "XblAuthManager",
+                    "description": "Xbox Live Auth Manager"
+                },
+                {
+                    "name": "XblGameSave",
+                    "description": "Xbox Live Game Save"
+                },
+                {
+                    "name": "XboxNetApiSvc",
+                    "description": "Xbox Live Networking Service"
+                },
+                {
+                    "name": "XboxGipSvc",
+                    "description": "Xbox Accessory Management"
+                }
+            ]
+        },
+        {
+            "name": "Impressao e Fax",
+            "services": [
+                {
+                    "name": "Spooler",
+                    "description": "Print Spooler"
+                },
+                {
+                    "name": "PrintNotify",
+                    "description": "Printer Extensions and Notifications"
+                },
+                {
+                    "name": "Fax",
+                    "description": "Fax Service"
+                }
+            ]
+        },
+        {
+            "name": "Acesso Remoto",
+            "services": [
+                {
+                    "name": "RemoteRegistry",
+                    "description": "Remote Registry"
+                },
+                {
+                    "name": "RemoteAccess",
+                    "description": "Routing and Remote Access"
+                },
+                {
+                    "name": "SessionEnv",
+                    "description": "Remote Desktop Configuration"
+                },
+                {
+                    "name": "TermService",
+                    "description": "Remote Desktop Services"
+                }
+            ]
+        },
+        {
+            "name": "Outros Servicos",
+            "services": [
+                {
+                    "name": "MapsBroker",
+                    "description": "Downloaded Maps Manager"
+                },
+                {
+                    "name": "PhoneSvc",
+                    "description": "Phone Service"
+                },
+                {
+                    "name": "RetailDemo",
+                    "description": "Retail Demo Service"
+                },
+                {
+                    "name": "WalletService",
+                    "description": "WalletService"
+                },
+                {
+                    "name": "WSearch",
+                    "description": "Windows Search"
+                },
+                {
+                    "name": "bthserv",
+                    "description": "Bluetooth Support Service"
+                },
+                {
+                    "name": "TapiSrv",
+                    "description": "Telephony"
+                },
+                {
+                    "name": "AJRouter",
+                    "description": "AllJoyn Router Service"
+                },
+                {
+                    "name": "MixedRealityOpenXRSvc",
+                    "description": "Windows Mixed Reality OpenXR Service"
+                }
+            ]
+        }
+    ],
+    "bloatwareApps": [
+        {
+            "name": "Microsoft.BingNews",
+            "description": "Bing News"
+        },
+        {
+            "name": "Microsoft.BingWeather",
+            "description": "Bing Weather"
+        },
+        {
+            "name": "Microsoft.GetHelp",
+            "description": "Get Help"
+        },
+        {
+            "name": "Microsoft.Getstarted",
+            "description": "Tips"
+        },
+        {
+            "name": "Microsoft.MicrosoftSolitaireCollection",
+            "description": "Solitaire Collection"
+        },
+        {
+            "name": "Microsoft.MixedReality.Portal",
+            "description": "Mixed Reality Portal"
+        },
+        {
+            "name": "Microsoft.People",
+            "description": "People"
+        },
+        {
+            "name": "Microsoft.WindowsFeedbackHub",
+            "description": "Feedback Hub"
+        },
+        {
+            "name": "Microsoft.ZuneMusic",
+            "description": "Groove Music"
+        },
+        {
+            "name": "Microsoft.ZuneVideo",
+            "description": "Movies & TV"
+        },
+        {
+            "name": "Clipchamp.Clipchamp",
+            "description": "Clipchamp Video Editor"
+        },
+        {
+            "name": "Microsoft.549981C3F5F10",
+            "description": "Cortana"
+        }
+    ],
+    "registryOptimizations": {
+        "visualEffects": [
+            {
+                "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects",
+                "name": "VisualFXSetting",
+                "value": 2,
+                "type": "DWord",
+                "description": "Ajustar para melhor desempenho"
+            },
+            {
+                "path": "HKCU:\\Control Panel\\Desktop",
+                "name": "UserPreferencesMask",
+                "value": [
+                    144,
+                    18,
+                    3,
+                    128,
+                    16,
+                    0,
+                    0,
+                    0
+                ],
+                "type": "Binary",
+                "description": "Desativar animacoes de janela"
+            },
+            {
+                "path": "HKCU:\\Control Panel\\Desktop\\WindowMetrics",
+                "name": "MinAnimate",
+                "value": "0",
+                "type": "String",
+                "description": "Desativar animacao de minimizar"
+            }
+        ],
+        "gameBar": [
+            {
+                "path": "HKCU:\\System\\GameConfigStore",
+                "name": "GameDVR_Enabled",
+                "value": 0,
+                "type": "DWord",
+                "description": "Desativar Game DVR"
+            },
+            {
+                "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR",
+                "name": "AppCaptureEnabled",
+                "value": 0,
+                "type": "DWord",
+                "description": "Desativar captura de tela"
+            },
+            {
+                "path": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR",
+                "name": "AllowGameDVR",
+                "value": 0,
+                "type": "DWord",
+                "description": "Politica para desativar Game DVR"
+            }
+        ],
+        "tipsAndAds": [
+            {
+                "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+                "name": "SoftLandingEnabled",
+                "value": 0,
+                "type": "DWord",
+                "description": "Desativar dicas de apps"
+            },
+            {
+                "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+                "name": "SubscribedContent-338388Enabled",
+                "value": 0,
+                "type": "DWord",
+                "description": "Desativar sugestoes no Menu Iniciar"
+            },
+            {
+                "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+                "name": "SubscribedContent-310093Enabled",
+                "value": 0,
+                "type": "DWord",
+                "description": "Desativar dicas na tela de bloqueio"
+            },
+            {
+                "path": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced",
+                "name": "ShowSyncProviderNotifications",
+                "value": 0,
+                "type": "DWord",
+                "description": "Desativar anuncios no Explorer"
+            }
+        ]
+    },
+    "powerPlans": {
+        "highPerformance": "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",
+        "balanced": "381b4222-f694-41f0-9685-ff5bb260df2e"
+    }
+}
