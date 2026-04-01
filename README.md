@@ -30,6 +30,9 @@ Além disso, a janela possui um **>_ Terminal de Logs de Execução** embutido n
 * 🔄 **Reversibilidade Inteligente:** O sistema detecta ativamente quais parâmetros do sistema/registro já estão otimizados. Para cada categoria detectada, a interface gera um botão "Reverter", permitindo desfazer mudanças de forma cirúrgica. Também há um botão global "Reverter Tudo".
 * 📊 **Monitoramento Dinâmico:** Leitura em tempo real do uso do processador (CPU) via `Get-CimInstance` e de Memória RAM visíveis diretamente no Dashboard principal.
 * ⚡ **Desativação Limpa de Serviços:** Scripts adaptados para paralisar dependências de forma segura e limpa, lendo regras de forma dinâmica através do banco de dados em `ServiceList.json`.
+* 🧾 **Auditoria Estruturada:** Além do log textual, o módulo também mantém trilha de auditoria em `optimizer_audit.jsonl`, com `OperationId`, usuário, máquina e modo de execução.
+* 🧪 **Modo Dry-Run (Simulação):** Permite validar impacto e fluxo da automação sem aplicar alterações em serviços, registro e remoção de apps.
+* ✅ **Validação de Configuração JSON:** A estrutura de categorias/serviços é validada antes da execução para reduzir risco operacional.
 
 ---
 
@@ -54,6 +57,26 @@ O projeto já está compilado de forma portável em um prático arquivo `.exe`.
 - **WPF e XAML (Frontend):** O `GUI.ps1` carrega dinamicamente XML pre-formatado com botões, cards arredondados, customização do ScrollViewer, Dispatcher Timers para monitoramento assíncrono de RAM/CPU e iconografia utilizando a fonte `Segoe MDL2 Assets`.
 - **JSON (Banco de Regras):** Um arquivo flexível (`ServiceList.json`) permite adicionar ou remover novos aplicativos bloatware ou nomes de serviços sem editar o código fonte do PowerShell.
 - **PS2EXE:** Utilizado para empacotar o software em um `.exe` livre de janelas de prompt (Flag `-noConsole`).
+
+---
+
+## 🏢 Recursos corporativos recomendados (já suportados no módulo)
+
+Para uso em ambientes corporativos, você pode executar o módulo em sessão identificada e com simulação:
+
+```powershell
+Import-Module .\src\ServiceOptimizer.psm1 -Force
+$opId = Start-OptimizationSession
+Set-ExecutionMode -DryRun $true
+$cfg = Get-ServicesByCategory -JsonPath .\src\ServiceList.json
+Optimize-ServicesByCategory -CategoryName "Telemetria e Rastreamento" -Config $cfg
+```
+
+Quando estiver pronto para aplicar de fato:
+
+```powershell
+Set-ExecutionMode -DryRun $false
+```
 
 ---
 

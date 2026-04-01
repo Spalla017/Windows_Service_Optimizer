@@ -14,6 +14,11 @@ $Script:AppName = "Windows Service Optimizer"
 $Script:Version = "1.0.0"
 $Script:BackupFolder = "$env:USERPROFILE\Documents\ServiceOptimizer_Backups"
 $Script:LogFile = "$Script:BackupFolder\optimizer_log.txt"
+$Script:StructuredLogFile = "$Script:BackupFolder\optimizer_audit.jsonl"
+$Script:ExecutionOptions = @{
+    DryRun      = $false
+    OperationId = $null
+}
 
 # ============================================================================
 # FUNCOES DE LOGGING
@@ -23,13 +28,132 @@ function Write-Log {
     param([string]$Message, [string]$Level = "INFO")
     
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-    $logEntry = "[$timestamp] [$Level] $Message"
+    $operationId = if ($Script:ExecutionOptions.OperationId) { $Script:ExecutionOptions.OperationId } else { "N/A" }
+    $actor = "$env:USERDOMAIN\$env:USERNAME"
+    $logEntry = "[$timestamp] [$Level] [OperationId:$operationId] [Actor:$actor] $Message"
     
     if (-not (Test-Path $Script:BackupFolder)) {
         New-Item -ItemType Directory -Path $Script:BackupFolder -Force | Out-Null
     }
     
     Add-Content -Path $Script:LogFile -Value $logEntry -ErrorAction SilentlyContinue
+    Write-StructuredLog -Message $Message -Level $Level
+}
+
+function Write-StructuredLog {
+    <#
+    .SYNOPSIS
+        Escreve log de auditoria estruturado em formato JSONL
+    #>
+    param([string]$Message, [string]$Level = "INFO")
+    
+    try {
+        if (-not (Test-Path $Script:BackupFolder)) {
+            New-Item -ItemType Directory -Path $Script:BackupFolder -Force | Out-Null
+        }
+        
+        $event = @{
+            TimestampUtc = (Get-Date).ToUniversalTime().ToString("o")
+            Level        = $Level
+            Message      = $Message
+            AppName      = $Script:AppName
+            Version      = $Script:Version
+            Machine      = $env:COMPUTERNAME
+            Actor        = "$env:USERDOMAIN\$env:USERNAME"
+            OperationId  = $Script:ExecutionOptions.OperationId
+            DryRun       = [bool]$Script:ExecutionOptions.DryRun
+        }
+        
+        Add-Content -Path $Script:StructuredLogFile -Value ($event | ConvertTo-Json -Compress) -ErrorAction SilentlyContinue
+    }
+    catch {
+        # Nao interromper o fluxo por falha de log
+    }
+}
+
+function Start-OptimizationSession {
+    <#
+    .SYNOPSIS
+        Inicializa um ID de operacao para rastreabilidade
+    #>
+    param([string]$OperationId)
+    
+    if ([string]::IsNullOrWhiteSpace($OperationId)) {
+        $OperationId = [guid]::NewGuid().ToString()
+    }
+    
+    $Script:ExecutionOptions.OperationId = $OperationId
+    Write-Log "Sessao de otimizacao iniciada" "INFO"
+    return $OperationId
+}
+
+function Set-ExecutionMode {
+    <#
+    .SYNOPSIS
+        Define modo de execucao (aplicacao real ou simulacao/dry-run)
+    #>
+    param([bool]$DryRun = $false)
+    
+    $Script:ExecutionOptions.DryRun = $DryRun
+    if ($DryRun) {
+        Write-Log "Modo DRY-RUN ativado. Nenhuma alteracao sera aplicada." "WARNING"
+    }
+    else {
+        Write-Log "Modo de execucao REAL ativado." "INFO"
+    }
+}
+
+function Test-ServiceOptimizerConfig {
+    <#
+    .SYNOPSIS
+        Valida estrutura basica da configuracao JSON antes da execucao
+    #>
+    param([object]$Config)
+    
+    $errors = New-Object System.Collections.Generic.List[string]
+    
+    if (-not $Config) {
+        $errors.Add("Configuracao nula.")
+    }
+    
+    if (-not $Config.categories) {
+        $errors.Add("Sessao 'categories' ausente.")
+    }
+    else {
+        foreach ($category in $Config.categories) {
+            if ([string]::IsNullOrWhiteSpace($category.name)) {
+                $errors.Add("Categoria sem nome.")
+            }
+            
+            if (-not $category.services) {
+                $errors.Add("Categoria '$($category.name)' sem lista de servicos.")
+                continue
+            }
+            
+            foreach ($service in $category.services) {
+                if ([string]::IsNullOrWhiteSpace($service.name)) {
+                    $errors.Add("Categoria '$($category.name)' contem servico sem nome.")
+                }
+            }
+        }
+    }
+    
+    if ($errors.Count -gt 0) {
+        foreach ($errorMessage in $errors) {
+            Write-Log "Config invalida: $errorMessage" "ERROR"
+        }
+        
+        return @{
+            IsValid = $false
+            Errors  = $errors
+        }
+    }
+    
+    Write-Log "Configuracao validada com sucesso." "SUCCESS"
+    return @{
+        IsValid = $true
+        Errors  = @()
+    }
 }
 
 # ============================================================================
@@ -130,6 +254,11 @@ function Disable-ServiceSafely {
             return $false
         }
         
+        if ($Script:ExecutionOptions.DryRun) {
+            Write-Log "DRY-RUN: Servico seria desativado: $ServiceName" "INFO"
+            return $true
+        }
+        
         if ($service.Status -eq 'Running') {
             Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue
         }
@@ -162,6 +291,11 @@ function Enable-ServiceSafely {
             return $false
         }
         
+        if ($Script:ExecutionOptions.DryRun) {
+            Write-Log "DRY-RUN: Servico seria reativado: $ServiceName ($StartupType)" "INFO"
+            return $true
+        }
+        
         Set-Service -Name $ServiceName -StartupType $StartupType -ErrorAction Stop
         Write-Log "Servico reativado: $ServiceName ($StartupType)" "SUCCESS"
         return $true
@@ -186,6 +320,12 @@ function Get-ServicesByCategory {
         }
         
         $config = Get-Content -Path $JsonPath -Raw | ConvertFrom-Json
+        $validation = Test-ServiceOptimizerConfig -Config $config
+        if (-not $validation.IsValid) {
+            Write-Log "Configuracao rejeitada por erro de validacao." "ERROR"
+            return $null
+        }
+        
         return $config
     }
     catch {
@@ -354,6 +494,11 @@ function Remove-BloatwareApp {
             return $false
         }
         
+        if ($Script:ExecutionOptions.DryRun) {
+            Write-Log "DRY-RUN: App seria removido: $PackageName" "INFO"
+            return $true
+        }
+        
         Get-AppxPackage -Name $PackageName | Remove-AppxPackage -ErrorAction Stop
         Write-Log "App removido: $PackageName" "SUCCESS"
         return $true
@@ -399,6 +544,11 @@ function Set-RegistryOptimization {
     )
     
     try {
+        if ($Script:ExecutionOptions.DryRun) {
+            Write-Log "DRY-RUN: Registro seria aplicado: $Path\$Name" "INFO"
+            return $true
+        }
+        
         # Cria a chave se nao existir
         if (-not (Test-Path $Path)) {
             New-Item -Path $Path -Force | Out-Null
@@ -1192,6 +1342,10 @@ function Repair-WindowsUpdate {
 
 Export-ModuleMember -Function @(
     'Write-Log',
+    'Write-StructuredLog',
+    'Start-OptimizationSession',
+    'Set-ExecutionMode',
+    'Test-ServiceOptimizerConfig',
     'New-ServiceBackup',
     'Restore-ServicesFromBackup',
     'Disable-ServiceSafely',
@@ -1229,4 +1383,3 @@ Export-ModuleMember -Function @(
     'Restore-ServiceCategory',
     'Restore-RegistryDefault'
 )
-
